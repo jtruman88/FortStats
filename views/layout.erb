@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>FortStats</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/stylehseets/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>FortStats</h1>
+      <nav>
+        <ul>
+          <li>Home</li>
+          <li>My Stats</li>
+          <li>Players</li>
+          <li>Leaderboard</li>
+        </ul>
+      </nav>
+    </header>
+    <section>
+      <% if session[:success] %>
+        <div class="flash success">
+          <p><%= session.delete(:success) %></p>
+        </div>
+      <% end %>
+
+      <% if session[:error] %>
+        <div class="flash error">
+          <p><%= session.delete(:error) %></p>
+        </div>
+      <% end %>
+    </section>
+    <main>
+      <%== yield %>
+    </main>
+  </body>
+</html>
