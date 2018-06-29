@@ -16,8 +16,15 @@ configure(:development) do
   also_reload "database_persistence.rb"
 end
 
+helpers do
+  def admin?(user)
+    @data.is_admin?(user)
+  end
+end
+
 before do
   @data = DatabasePersistence.new
+  @current_season = @data.get_season
 end
 
 after do
@@ -193,4 +200,24 @@ post '/players/login/update' do
   else
     erb :update
   end
+end
+
+get '/player/stats/:type/:season' do
+  @type = params[:type]
+  @season = params[:season]
+  @seasons = @data.get_seasons
+  @summary_stats = @data.get_summary(session[:current_user], @season, @type)
+  @match_stats = @data.get_match(session[:current_user], @season, @type)
+  
+  erb :my_stats
+end
+
+post '/player/filter-stats' do
+  @type = params[:type]
+  @season = params[:season]
+  @seasons = @data.get_seasons
+  @summary_stats = @data.get_summary(session[:current_user], @season, @type)
+  @match_stats = @data.get_match(session[:current_user], @season, @type)
+  
+  erb :my_stats
 end
