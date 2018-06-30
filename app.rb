@@ -202,22 +202,28 @@ post '/players/login/update' do
   end
 end
 
-get '/player/stats/:type/:season' do
+get '/player/stats/:type/:season/page-:page_number' do
   @type = params[:type]
   @season = params[:season]
   @seasons = @data.get_seasons
+  @page = params[:page_number].to_i
+  offset = (@page - 1) * 10
   @summary_stats = @data.get_summary(session[:current_user], @season, @type)
-  @match_stats = @data.get_match(session[:current_user], @season, @type)
+  @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
+  @page_limit = (@match_stats.first[:entries] / 10.0).ceil
   
   erb :my_stats
 end
 
-post '/player/filter-stats' do
+get '/player/stats/filter/page-:page_number' do
   @type = params[:type]
   @season = params[:season]
   @seasons = @data.get_seasons
+  @page = params[:page_number].to_i
+  offset = (@page - 1) * 10
   @summary_stats = @data.get_summary(session[:current_user], @season, @type)
-  @match_stats = @data.get_match(session[:current_user], @season, @type)
+  @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
+  @page_limit = (@match_stats.first[:entries] / 10.0).ceil
   
   erb :my_stats
 end

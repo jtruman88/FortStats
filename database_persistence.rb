@@ -90,37 +90,41 @@ class DatabasePersistence
     season_id = get_season_id(season)
     type_id = get_type_id(type)
     
-    sql = if season == 'all' && type == 'combined'
-            summary_unfiltered
-          elsif season == 'all'
-            summary_filtered_type
-          elsif type == 'combined'
-            summary_filtered_season
-          else
-            summary_filtered_season_type
-          end
-    
-    result = query(sql, user_id, season_id, type_id)
-    
+    if season == 'all' && type == 'combined'
+      sql = summary_unfiltered
+      result = query(sql, user_id)
+    elsif season == 'all'
+      sql = summary_filtered_type
+      result = query(sql, user_id, type_id)
+    elsif type == 'combined'
+      sql = summary_filtered_season
+      result = query(sql, user_id, season_id)
+    else
+      sql = summary_filtered_season_type
+      result = query(sql, user_id, season_id, type_id)
+    end  
+        
     result.map { |tuple| summary_hash(tuple) }
   end
 
-  def get_match(user, season, type)
+  def get_match(user, season, type, offset)
     user_id = get_user_id(user)
     season_id = get_season_id(season)
     type_id = get_type_id(type)
     
-    sql = if season == 'all' && type == 'combined'
-            match_unfiltered
-          elsif season == 'all'
-            match_filtered_type
-          elsif type == 'combined'
-            match_filtered_season
-          else
-            match_filtered_season_type
-          end
-
-    result = query(sql, user_id, season_id, type_id)
+    if season == 'all' && type == 'combined'
+      sql = match_unfiltered
+      result = query(sql, user_id, offset)
+    elsif season == 'all'
+      sql = match_filtered_type
+      result = query(sql, user_id, type_id, offset)
+    elsif type == 'combined'
+      sql = match_filtered_season
+      result = query(sql, user_id, season_id, offset)
+    else
+      sql = match_filtered_season_type
+      result = query(sql, user_id, season_id, type_id, offset)
+    end    
 
     result.map { |tuple| match_hash(tuple) }
   end
@@ -158,7 +162,8 @@ class DatabasePersistence
       place: tuple['place'],
       elims: tuple['elims'],
       type: tuple['type'],
-      points: tuple['points'] }
+      points: tuple['points'],
+      entries: tuple['entries'].to_i }
   end
   
   def get_user_id(user)
@@ -228,13 +233,13 @@ class DatabasePersistence
   def summary_filtered_type
     sql = <<~SQL
       SELECT (SELECT COUNT(place) FROM matches WHERE place = 1 AND player_id = $1 AND
-      match_type_id = $3) AS wins,
+      match_type_id = $2) AS wins,
       ROUND(AVG(matches.place)) AS avg_place, SUM(matches.elims) AS elims,
       ROUND(AVG(matches.elims)) AS avg_elims, SUM(place_points + elim_points) AS points
       FROM matches JOIN players ON matches.player_id = players.id
       JOIN match_types ON matches.match_type_id = match_types.id
       JOIN seasons ON matches.season_id = seasons.id
-      WHERE players.id = $1 AND match_types.id = $3
+      WHERE players.id = $1 AND match_types.id = $2
       GROUP BY players.username
       ORDER BY points;
     SQL
@@ -243,48 +248,57 @@ class DatabasePersistence
   def match_unfiltered
     sql = <<~SQL
       SELECT (EXTRACT(month from date_played) || '/' || EXTRACT(day FROM date_played) || '/' || EXTRACT(year FROM date_played)) AS date,
+      (SELECT COUNT(matches.id) FROM matches WHERE player_id = $1) AS entries,
       matches.place AS place, matches.elims AS elims, match_types.match_type AS type, (place_points + elim_points) AS points
       FROM matches JOIN players ON matches.player_id = players.id
       JOIN seasons ON matches.season_id = seasons.id
       JOIN match_types ON matches.match_type_id = match_types.id
       WHERE players.id = $1
-      ORDER BY date_played;
+      ORDER BY date_played
+      LIMIT 10 OFFSET $2;
     SQL
   end
 
   def match_filtered_type
     sql = <<~SQL
       SELECT (EXTRACT(month from date_played) || '/' || EXTRACT(day FROM date_played) || '/' || EXTRACT(year FROM date_played)) AS date,
+      (SELECT COUNT(matches.id) FROM matches WHERE player_id = $1 AND match_type_id = $2) AS entries,
       matches.place AS place, matches.elims AS elims, match_types.match_type AS type, (place_points + elim_points) AS points
       FROM matches JOIN players ON matches.player_id = players.id
       JOIN seasons ON matches.season_id = seasons.id
       JOIN match_types ON matches.match_type_id = match_types.id
-      WHERE players.id = $1 AND match_types.id = $3
-      ORDER BY date_played;
+      WHERE players.id = $1 AND match_types.id = $2
+      ORDER BY date_played
+      LIMIT 10 OFFSET $3;
     SQL
   end
 
   def match_filtered_season
     sql = <<~SQL
       SELECT (EXTRACT(month from date_played) || '/' || EXTRACT(day FROM date_played) || '/' || EXTRACT(year FROM date_played)) AS date,
+      (SELECT COUNT(matches.id) FROM matches WHERE player_id = $1 AND season_id = $2) AS entries,
       matches.place AS place, matches.elims AS elims, match_types.match_type AS type, (place_points + elim_points) AS points
       FROM matches JOIN players ON matches.player_id = players.id
       JOIN seasons ON matches.season_id = seasons.id
       JOIN match_types ON matches.match_type_id = match_types.id
       WHERE players.id = $1 AND seasons.id = $2
-      ORDER BY date_played;
+      ORDER BY date_played
+      LIMIT 10 OFFSET $3;
     SQL
   end
 
   def match_filtered_season_type
     sql = <<~SQL
       SELECT (EXTRACT(month from date_played) || '/' || EXTRACT(day FROM date_played) || '/' || EXTRACT(year FROM date_played)) AS date,
+      (SELECT COUNT(matches.id) FROM matches
+      WHERE player_id = $1 AND season_id = $2 AND match_type_id = $3) AS entries,
       matches.place AS place, matches.elims AS elims, match_types.match_type AS type, (place_points + elim_points) AS points
       FROM matches JOIN players ON matches.player_id = players.id
       JOIN seasons ON matches.season_id = seasons.id
       JOIN match_types ON matches.match_type_id = match_types.id
       WHERE players.id = $1 AND seasons.id = $2 AND match_types.id = $3
-      ORDER BY date_played;
+      ORDER BY date_played
+      LIMIT 10 OFFSET $4;
     SQL
   end
 end
