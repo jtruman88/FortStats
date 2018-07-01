@@ -1,0 +1,46 @@
+<section class="add-stats">
+  <h2>Add Match Stats</h2>
+
+  <form action="/player/stats/add" method="post">
+    <fieldset>
+      <label for="type">Match Type</label>
+      <select name="type">
+        <option value="solo" <%= ('selected' if @type == 'solo') %>>Solo</option>
+        <option value="duo" <%= ('selected' if @type == 'duo') %>>Duo</option>
+        <option value="squad" <%= ('selected' if @type == 'squad') %>>Squad</option>
+      </select>
+      <input type="submit" value="Select" formaction="/player/stats/add" formmethod="get">
+    </fieldset>
+    <% if @type == 'duo' %>
+      <fieldset>
+        <label for="players">Players In Duo</label>
+        <select name="players">
+          <option value="2" selected>2</option> 
+          <option value="1">1</option> 
+        </select>
+      </fieldset>
+    <% elsif @type == 'squad' %>
+      <fieldset>
+        <label for="players">Players In Squad</label>
+        <select name="players">
+          <option value="4" selected>4</option> 
+          <option value="3">3</option> 
+          <option value="2">2</option> 
+          <option value="1">1</option> 
+        </select>
+      </fieldset>
+    <% end %>
+    <fieldset>
+      <label for="place">Place</label>
+      <input type="text" autocomplete="off" name="place" id="place" value="<%= @place || '' %>">
+    </fieldset>
+    <fieldset>
+      <label for="elims">Eliminations</label>
+      <input type="text" autocomplete="off" name="elims" id="elims" value="<%= @elims || '' %>">
+    </fieldset>
+    <input type="submit" value="Add">
+  </form>
+  <a href="/player/stats/combined/<%= @current_season %>/page-1">
+    Finished Adding Stats
+  </a>
+</section>

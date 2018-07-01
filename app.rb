@@ -102,6 +102,33 @@ def update_password(username, password)
   @data.update_password(username, bcrypt_password)
 end
 
+def valid_stats?(place, elims)
+  (place > 0 && place < 100) &&
+  (elims < 99)
+end
+
+def calc_elim_points(type, elims, players)
+  multiplier = {'solo' => 1, 'duo' => 2, 'squad' => 4}
+  points = @data.get_elim_points * multiplier[type] * elims
+end
+
+def calc_place_points(type, place, players)
+  handicap_multiplier = {'solo' => 1, 'duo' => 2, 'squad' => 2.4}
+  divisor = {'solo' => 1, 'duo' => 2, 'squad' => 4}
+  points = @data.get_place_points(place) / divisor[type]
+  handicap = if type == 'squad'
+               missing_players = 4 - players
+               points * handicap_multiplier[type] * missing_players
+             elsif type == 'duo'
+               missing_players = 2 - players
+               points * handicap_multiplier[type] * missing_players
+             else
+               0
+             end
+
+  (points + handicap).round
+end
+
 get '/' do
   if session[:logged_in]
     @last_ten = @data.get_last_ten
@@ -210,7 +237,7 @@ get '/player/stats/:type/:season/page-:page_number' do
   offset = (@page - 1) * 10
   @summary_stats = @data.get_summary(session[:current_user], @season, @type)
   @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
-  @page_limit = (@match_stats.first[:entries] / 10.0).ceil
+  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
   
   erb :my_stats
 end
@@ -223,7 +250,38 @@ get '/player/stats/filter/page-:page_number' do
   offset = (@page - 1) * 10
   @summary_stats = @data.get_summary(session[:current_user], @season, @type)
   @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
-  @page_limit = (@match_stats.first[:entries] / 10.0).ceil
+  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
   
   erb :my_stats
 end
+
+get '/player/stats/add' do
+  @type = params[:type]
+  
+  erb :add_stats
+end
+
+post '/player/stats/add' do
+  @type = params[:type]
+  @players = params[:players].to_i
+  @place = params[:place].to_i
+  @elims = params[:elims].to_i
+  user = session[:current_user]
+  season = @current_season
+  
+  if valid_stats?(@place, @elims)
+    elim_points = calc_elim_points(@type, @elims, @players)
+    place_points = calc_place_points(@type, @place, @players)
+    @data.add_stats(user, @type, season, place_points, elim_points, @place, @elims)
+    session[:success] = 'Your stats have been added!'
+    
+    redirect '/player/stats/add'
+  else
+    session[:error] = 'Please enter valid values.'
+    
+    erb :add_stats
+  end
+end
+
+# ADD IF LOGGED_IN / ADMIN PROTECTION TO LOGIN / ADMIN ONLY PAGES
+# ALSO ADD INVALID PAGE CATCH

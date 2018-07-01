@@ -40,7 +40,7 @@ class DatabasePersistence
       (matches.elim_points + matches.place_points) AS points
       FROM players JOIN matches ON players.id = matches.player_id
       JOIN match_types ON match_types.id = matches.match_type_id
-      ORDER BY matches.date_played
+      ORDER BY matches.date_played DESC
       LIMIT 10;
     SQL
     
@@ -65,7 +65,7 @@ class DatabasePersistence
     
     result = query(sql)
     
-    result.map { |tuple| {number: tuple['season']} }
+    result.map { |tuple| tuple['season'] }.first
   end
   
   def get_seasons
@@ -129,7 +129,36 @@ class DatabasePersistence
     result.map { |tuple| match_hash(tuple) }
   end
   
-  private
+  def get_elim_points
+    sql = 'SELECT point_value FROM elim_points;'
+    
+    result = query(sql)
+    
+    result.map { |tuple| tuple['point_value'] }.first.to_i
+  end
+  
+  def get_place_points(place)
+    sql = 'SELECT point_value FROM place_points WHERE ($1)::integer <@ place;'
+    
+    result = query(sql, place.to_i)
+    
+    result.map { |tuple| tuple['point_value'] }.first.to_i
+  end
+  
+  def add_stats(user, type, season, place_points, elim_points, place, elims)
+    user_id = get_user_id(user)
+    type_id = get_type_id(type)
+    season_id = get_season_id(season)
+    
+    sql = <<~SQL
+      INSERT INTO matches (player_id, match_type_id, season_id, place_points,
+      elim_points, place, elims) VALUES ($1, $2, $3, $4, $5, $6, $7);
+    SQL
+    
+    result = query(sql, user_id, type_id, season_id, place_points, elim_points, place, elims)
+  end
+  
+  private #-----------------------------------------------------------------------------------------
   
   attr_reader :db
   

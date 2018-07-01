@@ -1,0 +1,6 @@
+@import url(whitespace-reset.css);
+
+footer img {
+  display: inline-block;
+  width: 40px;
+}
