@@ -183,8 +183,48 @@ module Filterable
   end
 end
 
+module Hashable
+  private
+  
+  def last_ten_hash(tuple)
+    { username: tuple['username'],
+      place: tuple['place'].to_i,
+      elims: tuple['elims'].to_i,
+      match_type: tuple['match_type'].capitalize,
+      points: tuple['points'].to_i }
+  end
+  
+  def summary_hash(tuple)
+    { wins: tuple['wins'],
+      avg_place: tuple['avg_place'],
+      elims: tuple['elims'],
+      avg_elims: tuple['avg_elims'],
+      points: tuple['points'] }
+  end
+
+  def match_hash(tuple)
+    { date: tuple['date'],
+      place: tuple['place'],
+      elims: tuple['elims'],
+      type: tuple['type'],
+      points: tuple['points'],
+      entries: tuple['entries'].to_i }
+  end
+  
+  def leaderboard_hash(tuple)
+    { user: tuple['user'],
+      points: tuple['points'].to_i,
+      wins: tuple['wins'].to_i,
+      avg_place: tuple['avg_place'].to_i,
+      elims: tuple['elims'].to_i,
+      avg_elims: tuple['avg_elims'].to_i,
+      played: tuple['played'].to_i }
+  end
+end
+
 class DatabasePersistence
   include Filterable
+  include Hashable
   
   def initialize
     @db = connect_to_database
@@ -398,41 +438,6 @@ class DatabasePersistence
     else
       PG.connect(dbname: "fort_test")
     end
-  end
-  
-  def last_ten_hash(tuple)
-    { username: tuple['username'],
-      place: tuple['place'].to_i,
-      elims: tuple['elims'].to_i,
-      match_type: tuple['match_type'].capitalize,
-      points: tuple['points'].to_i }
-  end
-  
-  def summary_hash(tuple)
-    { wins: tuple['wins'],
-      avg_place: tuple['avg_place'],
-      elims: tuple['elims'],
-      avg_elims: tuple['avg_elims'],
-      points: tuple['points'] }
-  end
-
-  def match_hash(tuple)
-    { date: tuple['date'],
-      place: tuple['place'],
-      elims: tuple['elims'],
-      type: tuple['type'],
-      points: tuple['points'],
-      entries: tuple['entries'].to_i }
-  end
-  
-  def leaderboard_hash(tuple)
-    { user: tuple['user'],
-      points: tuple['points'].to_i,
-      wins: tuple['wins'].to_i,
-      avg_place: tuple['avg_place'].to_i,
-      elims: tuple['elims'].to_i,
-      avg_elims: tuple['avg_elims'].to_i,
-      played: tuple['played'].to_i }
   end
   
   def get_user_id(user)
