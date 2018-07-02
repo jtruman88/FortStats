@@ -1,15 +1,18 @@
-<h2>Player Login</h2>
+<section class="login">
+  <h2>Player Login</h2>
 
-<form action="/players/login" method="post">
-  <fieldset>
-    <label for="username">Username</label>
-    <input type="text" name="username" id="username" autocomplete="off" value="<%= @username || '' %>">
-  </fieldset>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" autocomplete="off">
-  <fieldset>
-  </fieldset>
-  <input type="submit" value="Login">
-  <p>Or <a href="/players/new">Sign Up</a></p>
-</form>
-<p><a href="/players/login/reset">I forgot my password...</a></p>
+  <form action="/players/login" method="post">
+    <fieldset>
+      <label for="username">Username</label>
+      <input type="text" name="username" id="username" autocomplete="off" value="<%= @username || '' %>">
+    </fieldset>
+    <fieldset>
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" autocomplete="off">
+    </fieldset>
+    <input type="submit" value="Login">
+    <p>Or</p>
+    <p><a class="big-button" href="/players/new">Sign Up</a></p>
+  </form>
+  <p><a href="/players/login/reset">I forgot my password...</a></p>
+</section>

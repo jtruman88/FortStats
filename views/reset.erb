@@ -1,15 +1,17 @@
-<h2>Password Reset</h2>
+<section class="login">
+  <h2>Password Reset</h2>
 
-<form action="/players/login/reset" method="post">
-  <fieldset>
-    <label for="username">Username</label>
-    <input type="text" name="username" id="username" autocomplete="off" value="<%= @username || '' %>">
-  </fieldset>
-  <fieldset>
-    <label for="question">
-      What's your second favorite color?
-    </label>
-    <input type="text" name="question" id="question" autocomplete="off" value="<%= @question || '' %>">
-  </fieldset>
-  <input type="submit" value="Continue">
-</form>
+  <form action="/players/login/reset" method="post">
+    <fieldset>
+      <label for="username">Username</label>
+      <input type="text" name="username" id="username" autocomplete="off" value="<%= @username || '' %>">
+    </fieldset>
+    <fieldset>
+      <label for="question">
+        What's your second favorite color?
+      </label>
+      <input type="text" name="question" id="question" autocomplete="off" value="<%= @question || '' %>">
+    </fieldset>
+    <input type="submit" value="Continue">
+  </form>
+</section>

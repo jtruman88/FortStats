@@ -1,15 +1,22 @@
 <section class="players">
-  <h2>All Players</h2>
-  <p>Check out other player's stats!</p>
-  <ul>
-    <% @players.each do |player| %>
-    <% current_player = player[:name] %>
-    <% next if current_player == session[:current_user] %>
-      <li>
-        <a href="/players/<%= current_player %>/stats/combined/<%= @current_season %>/page-1">
-          <%= current_player %>
-        </a>
-      </li>
-    <% end %>
-  </ul>
+  <% if session[:logged_in] %>
+    <h2>All Players</h2>
+    <p>Check out other player's stats!</p>
+    <ul>
+      <% @players.each do |player| %>
+      <% current_player = player[:name] %>
+      <% next if current_player == session[:current_user] %>
+        <li>
+          <a href="/players/<%= current_player %>/stats/combined/<%= @current_season %>/page-1">
+            <%= current_player %>
+          </a>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+  <h2>Login to view other player's stats</h2>
+  <p>
+    <a href="/players/login">Login</a> Or <a href="/players/new">Sign Up</a> to start tracking your stats!
+  </p>
+  <% end %>
 </section>

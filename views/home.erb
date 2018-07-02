@@ -1,41 +1,43 @@
-<% if session[:logged_in] %>
-  <h2>Welcome to ForStats, <%= session[:current_user] %>!</h2>
-  <form action="/players/logout" method="post">
-    <input type="submit" value="Logout">
-  </form>
+<section class="home">
+  <% if session[:logged_in] %>
+    <h2>Welcome to ForStats, <%= session[:current_user] %>!</h2>
+    <form action="/players/logout" method="post">
+      <input class="big-button" type="submit" value="Logout">
+    </form>
 
-  <h3>Last 10 Games Played</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Player</th>
-        <th>Place</th>
-        <th>Elims</th>
-        <th>Type</th>
-        <th>Points</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @last_ten.each do |match| %>
+    <h3>Last 10 Games Played</h3>
+    <table>
+      <thead>
         <tr>
-          <td><%= match[:username] %></td>
-          <td><%= match[:place] %></td>
-          <td><%= match[:elims] %></td>
-          <td><%= match[:match_type] %></td>
-          <td><%= match[:points] %></td>
+          <th>Player</th>
+          <th>Place</th>
+          <th>Elims</th>
+          <th>Type</th>
+          <th>Points</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
-  <p>
-    <a href="/faq">How are points calculated?</a>
-  </p>
-<% else %>
-  <h2>Welcome to FortStats!</h2>
-  <p>
-    FortStats allows you to keep track of your Fortnite stats and compare them to your friends to see how you stack up!
-  </p>
-  <p>
-    <a href="/players/login">Login</a> or <a href="/players/new">Sign Up</a> to start using FortStats.
-  </p>
-<% end %>
+      </thead>
+      <tbody>
+        <% @last_ten.each_with_index do |match, ind| %>
+          <tr class="<%= ('off-color' if ind % 2 == 0) %>">
+            <td><%= match[:username] %></td>
+            <td><%= match[:place] %></td>
+            <td><%= match[:elims] %></td>
+            <td><%= match[:match_type] %></td>
+            <td><%= match[:points] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p>
+      <a href="/faq">How are points calculated?</a>
+    </p>
+  <% else %>
+    <h2>Welcome to FortStats!</h2>
+    <p>
+      FortStats allows you to keep track of your Fortnite stats and compare them to your friends to see how you stack up!
+    </p>
+    <p>
+      <a href="/players/login">Login</a> to start using FortStats. Or <a href="/players/new">Sign Up</a>
+    </p>
+  <% end %>
+</section>

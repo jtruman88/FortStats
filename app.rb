@@ -235,9 +235,12 @@ get '/player/stats/:type/:season/page-:page_number' do
   @seasons = @data.get_seasons
   @page = params[:page_number].to_i
   offset = (@page - 1) * 10
-  @summary_stats = @data.get_summary(session[:current_user], @season, @type)
-  @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
-  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  
+  if session[:logged_in]
+    @summary_stats = @data.get_summary(session[:current_user], @season, @type)
+    @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
+    @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  end
   
   erb :my_stats
 end
@@ -248,9 +251,12 @@ get '/player/stats/filter/page-:page_number' do
   @seasons = @data.get_seasons
   @page = params[:page_number].to_i
   offset = (@page - 1) * 10
-  @summary_stats = @data.get_summary(session[:current_user], @season, @type)
-  @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
-  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  
+  if session[:logged_in]
+    @summary_stats = @data.get_summary(session[:current_user], @season, @type)
+    @match_stats = @data.get_match(session[:current_user], @season, @type, offset)
+    @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  end
   
   erb :my_stats
 end
@@ -316,9 +322,12 @@ get '/players/:user/stats/:type/:season/page-:page_number' do
   @seasons = @data.get_seasons
   @page = params[:page_number].to_i
   offset = (@page - 1) * 10
-  @summary_stats = @data.get_summary(@user, @season, @type)
-  @match_stats = @data.get_match(@user, @season, @type, offset)
-  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  
+  if session[:logged_in]
+    @summary_stats = @data.get_summary(@user, @season, @type)
+    @match_stats = @data.get_match(@user, @season, @type, offset)
+    @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  end
   
   erb :player_stats
 end
@@ -330,9 +339,12 @@ get '/players/:user/stats/filter/page-:page_number' do
   @seasons = @data.get_seasons
   @page = params[:page_number].to_i
   offset = (@page - 1) * 10
-  @summary_stats = @data.get_summary(@user, @season, @type)
-  @match_stats = @data.get_match(@user, @season, @type, offset)
-  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  
+  if session[:logged_in]
+    @summary_stats = @data.get_summary(@user, @season, @type)
+    @match_stats = @data.get_match(@user, @season, @type, offset)
+    @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  end
   
   erb :player_stats
 end

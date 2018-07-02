@@ -1,27 +1,29 @@
-<h2>New Player Sign Up</h2>
+<section class="login">
+  <h2>New Player Sign Up</h2>
 
-<form action="/players/new" method="post">
-  <fieldset>
-    <label for="username">Username</label>
-    <input type="text" name="username" id="username" autocomplete="off" value="<%= @username || '' %>">
-  </fieldset>
-  <fieldset>
-    <label for="password">Password</label>
-    <p>(minimum 6 characters, letters and numbers only)</p>
-    <input type="password" name="password" id="password" autocomplete="off">
-  </fieldset>
-  <fieldset>
-    <label for="repass">Re-Enter Password</label>
-    <input type="password" name="repass" id="repass" autocomplete="off">
-  </fieldset>
-  <fieldset>
-    <label for="question">
-      Just in case you forget your password,
-      <br>
-      What's your second favorite color?
-    </label>
-    <input type="text" name="question" id="question" autocomplete="off" value="<%= @question || '' %>">
-  </fieldset>
-  
-  <input type="submit" value="Sign Up">
-</form>
+  <form action="/players/new" method="post">
+    <fieldset>
+      <label for="username">Username</label>
+      <input type="text" name="username" id="username" autocomplete="off" value="<%= @username || '' %>">
+    </fieldset>
+    <fieldset>
+      <label for="password">Password</label>
+      <p>(minimum 6 characters, letters and numbers only)</p>
+      <input type="password" name="password" id="password" autocomplete="off">
+    </fieldset>
+    <fieldset>
+      <label for="repass">Re-Enter Password</label>
+      <input type="password" name="repass" id="repass" autocomplete="off">
+    </fieldset>
+    <fieldset>
+      <label class="question" for="question">
+        Just in case you forget your password,
+        <br>
+        What's your second favorite color?
+      </label>
+      <input type="text" name="question" id="question" autocomplete="off" value="<%= @question || '' %>">
+    </fieldset>
+
+    <input type="submit" value="Sign Up">
+  </form>
+</section>
