@@ -283,5 +283,82 @@ post '/player/stats/add' do
   end
 end
 
+get '/seasons/edit' do
+  @seasons = @data.get_seasons
+  
+  erb :seasons
+end
+
+post '/seasons/set-active' do
+  active = params[:active].to_i
+  @data.update_active_season(active)
+  session[:success] = "Season #{active} has been set to active."
+  redirect "/player/stats/combined/#{@current_season}/page-1"
+end
+
+post '/seasons/add' do
+  new_season = params[:new].to_i
+  @data.add_new_season(new_season)
+  session[:success] = "Season #{new_season} has been added."
+  redirect "/player/stats/combined/#{@current_season}/page-1"
+end
+
+get '/players' do
+  @players = @data.get_all_players
+  
+   erb :players
+end
+
+get '/players/:user/stats/:type/:season/page-:page_number' do
+  @user = params[:user]
+  @type = params[:type]
+  @season = params[:season]
+  @seasons = @data.get_seasons
+  @page = params[:page_number].to_i
+  offset = (@page - 1) * 10
+  @summary_stats = @data.get_summary(@user, @season, @type)
+  @match_stats = @data.get_match(@user, @season, @type, offset)
+  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  
+  erb :player_stats
+end
+
+get '/players/:user/stats/filter/page-:page_number' do
+  @user = params[:user]
+  @type = params[:type]
+  @season = params[:season]
+  @seasons = @data.get_seasons
+  @page = params[:page_number].to_i
+  offset = (@page - 1) * 10
+  @summary_stats = @data.get_summary(@user, @season, @type)
+  @match_stats = @data.get_match(@user, @season, @type, offset)
+  @page_limit = @match_stats.empty? ? 1 : (@match_stats.first[:entries] / 10.0).ceil
+  
+  erb :player_stats
+end
+
+get '/leaderboard/:type/:season/sort-by-:sort' do
+  @type = params[:type]
+  @season = params[:season]
+  @sort = params[:sort]
+  @seasons = @data.get_seasons
+  @leader_stats = @data.get_leaderboard_stats(@type, @season, @sort)
+
+  erb :leaderboard
+end
+
+get '/leaderboard/filter' do
+  @type = params[:type]
+  @season = params[:season]
+  @sort = params[:sort]
+  @seasons = @data.get_seasons
+  @leader_stats = @data.get_leaderboard_stats(@type, @season, @sort)
+  
+  erb :leaderboard
+end
+
+# ADD PLAYED TO MY STATS AND PLAYER STATS. WILL EQUAL NUMBER OF MATCHES PLAYED
 # ADD IF LOGGED_IN / ADMIN PROTECTION TO LOGIN / ADMIN ONLY PAGES
 # ALSO ADD INVALID PAGE CATCH
+# REMOVE ARROW FROM NEXT OR BACK IF NOT CLICKABLE
+# MOVE FILTER METHODS TO  FILTERABLE MODULE

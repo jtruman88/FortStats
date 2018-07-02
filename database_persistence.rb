@@ -1,219 +1,7 @@
 require 'pg'
 
-class DatabasePersistence
-  def initialize
-    @db = connect_to_database
-  end
-  
-  def disconnect
-    db.close
-  end
-  
-  def query(statement, *params)
-    db.exec_params(statement, params)
-  end
-  
-  def get_users
-    sql = <<~SQL
-      SELECT username, pass, question FROM players;
-    SQL
-    
-    result = query(sql)
-    
-    result.map do |tuple|
-      { username: tuple['username'], pass: tuple['pass'], question: tuple['question'] }
-    end
-  end
-  
-  def add_new_player(username, password, question)
-    sql = <<~SQL
-      INSERT INTO players (username, pass, question)
-      VALUES ($1, $2, $3);
-    SQL
-    
-    query(sql, username, password, question)
-  end
-  
-  def get_last_ten
-    sql = <<~SQL
-      SELECT players.username, matches.place, matches.elims, match_types.match_type,
-      (matches.elim_points + matches.place_points) AS points
-      FROM players JOIN matches ON players.id = matches.player_id
-      JOIN match_types ON match_types.id = matches.match_type_id
-      ORDER BY matches.date_played DESC
-      LIMIT 10;
-    SQL
-    
-    result = query(sql)
-    
-    result.map do |tuple|
-      last_ten_hash(tuple)
-    end
-  end
-  
-  def update_password(username, password)
-    sql = <<~SQL
-      UPDATE players SET pass = $1
-      WHERE username = $2;
-    SQL
-    
-    query(sql, password, username)
-  end
-  
-  def get_season
-    sql = 'SELECT season FROM seasons WHERE active = true;'
-    
-    result = query(sql)
-    
-    result.map { |tuple| tuple['season'] }.first
-  end
-  
-  def get_seasons
-    sql = 'SELECT season FROM seasons ORDER BY season ASC;'
-    
-    result = query(sql)
-    
-    result.map { |tuple| {number: tuple['season']} }
-  end
-  
-  def is_admin?(user)
-    sql = 'SELECT admin FROM players WHERE username = $1;'
-    
-    result = query(sql, user)
-    
-    admin = result.map { |tuple| {admin: tuple['admin']} }
-    admin.first[:admin] == 't'
-  end
-  
-  def get_summary(user, season, type)
-    user_id = get_user_id(user)
-    season_id = get_season_id(season)
-    type_id = get_type_id(type)
-    
-    if season == 'all' && type == 'combined'
-      sql = summary_unfiltered
-      result = query(sql, user_id)
-    elsif season == 'all'
-      sql = summary_filtered_type
-      result = query(sql, user_id, type_id)
-    elsif type == 'combined'
-      sql = summary_filtered_season
-      result = query(sql, user_id, season_id)
-    else
-      sql = summary_filtered_season_type
-      result = query(sql, user_id, season_id, type_id)
-    end  
-        
-    result.map { |tuple| summary_hash(tuple) }
-  end
-
-  def get_match(user, season, type, offset)
-    user_id = get_user_id(user)
-    season_id = get_season_id(season)
-    type_id = get_type_id(type)
-    
-    if season == 'all' && type == 'combined'
-      sql = match_unfiltered
-      result = query(sql, user_id, offset)
-    elsif season == 'all'
-      sql = match_filtered_type
-      result = query(sql, user_id, type_id, offset)
-    elsif type == 'combined'
-      sql = match_filtered_season
-      result = query(sql, user_id, season_id, offset)
-    else
-      sql = match_filtered_season_type
-      result = query(sql, user_id, season_id, type_id, offset)
-    end    
-
-    result.map { |tuple| match_hash(tuple) }
-  end
-  
-  def get_elim_points
-    sql = 'SELECT point_value FROM elim_points;'
-    
-    result = query(sql)
-    
-    result.map { |tuple| tuple['point_value'] }.first.to_i
-  end
-  
-  def get_place_points(place)
-    sql = 'SELECT point_value FROM place_points WHERE ($1)::integer <@ place;'
-    
-    result = query(sql, place.to_i)
-    
-    result.map { |tuple| tuple['point_value'] }.first.to_i
-  end
-  
-  def add_stats(user, type, season, place_points, elim_points, place, elims)
-    user_id = get_user_id(user)
-    type_id = get_type_id(type)
-    season_id = get_season_id(season)
-    
-    sql = <<~SQL
-      INSERT INTO matches (player_id, match_type_id, season_id, place_points,
-      elim_points, place, elims) VALUES ($1, $2, $3, $4, $5, $6, $7);
-    SQL
-    
-    result = query(sql, user_id, type_id, season_id, place_points, elim_points, place, elims)
-  end
-  
-  private #-----------------------------------------------------------------------------------------
-  
-  attr_reader :db
-  
-  def connect_to_database
-    if Sinatra::Base.production?
-      PG.connect(ENV['DATABASE_URL'])
-    else
-      PG.connect(dbname: "fort_test")
-    end
-  end
-  
-  def last_ten_hash(tuple)
-    { username: tuple['username'],
-      place: tuple['place'].to_i,
-      elims: tuple['elims'].to_i,
-      match_type: tuple['match_type'].capitalize,
-      points: tuple['points'].to_i }
-  end
-  
-  def summary_hash(tuple)
-    { wins: tuple['wins'],
-      avg_place: tuple['avg_place'],
-      elims: tuple['elims'],
-      avg_elims: tuple['avg_elims'],
-      points: tuple['points'] }
-  end
-
-  def match_hash(tuple)
-    { date: tuple['date'],
-      place: tuple['place'],
-      elims: tuple['elims'],
-      type: tuple['type'],
-      points: tuple['points'],
-      entries: tuple['entries'].to_i }
-  end
-  
-  def get_user_id(user)
-    sql = 'SELECT id FROM players WHERE username = $1;'
-    result = query(sql, user)
-    result.map { |tuple| {id: tuple['id']} }.first[:id]
-  end
-  
-  def get_season_id(season)
-    return 0 if season == 'all'
-    sql = 'SELECT id FROM seasons WHERE season = $1;'
-    result = query(sql, season)
-    result.map { |tuple| {id: tuple['id']} }.first[:id]
-  end
-  
-  def get_type_id(type)
-    return 0 if type == 'combined'
-    sql = 'SELECT id FROM match_types WHERE match_type = $1;'
-    result = query(sql, type)
-    result.map { |tuple| {id: tuple['id']} }.first[:id]
-  end
+module Filterable
+  private
   
   def summary_unfiltered
     sql = <<~SQL
@@ -329,5 +117,341 @@ class DatabasePersistence
       ORDER BY date_played
       LIMIT 10 OFFSET $4;
     SQL
+  end
+  
+  def leaderboard_unfiltered
+    sql = <<~SQL
+      SELECT matches.player_id, players.username AS user,
+      SUM(place_points + elim_points) AS points,
+      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
+      ROUND(AVG(matches.place)) AS avg_place,
+      SUM(matches.elims) AS elims,
+      ROUND(AVG(matches.elims)) AS avg_elims,
+      COUNT(matches.player_id) AS played
+      FROM players JOIN matches ON players.id = matches.player_id
+      GROUP BY players.username, matches.player_id
+      ORDER BY $1 DESC;
+    SQL
+  end
+  
+  def leaderboard_filtered_type
+    sql = <<~SQL
+      SELECT matches.player_id, players.username AS user,
+      SUM(place_points + elim_points) AS points,
+      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND match_type_id = $2 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
+      ROUND(AVG(matches.place)) AS avg_place,
+      SUM(matches.elims) AS elims,
+      ROUND(AVG(matches.elims)) AS avg_elims,
+      COUNT(matches.player_id) AS played
+      FROM players JOIN matches ON players.id = matches.player_id
+      WHERE match_type_id = $2
+      GROUP BY players.username, matches.player_id
+      ORDER BY $1 DESC;
+    SQL
+  end
+  
+  def leaderboard_filtered_season
+    sql = <<~SQL
+      SELECT matches.player_id, players.username AS user,
+      SUM(place_points + elim_points) AS points,
+      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND season_id = $2 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
+      ROUND(AVG(matches.place)) AS avg_place,
+      SUM(matches.elims) AS elims,
+      ROUND(AVG(matches.elims)) AS avg_elims,
+      COUNT(matches.player_id) AS played
+      FROM players JOIN matches ON players.id = matches.player_id
+      WHERE season_id = $2
+      GROUP BY players.username, matches.player_id
+      ORDER BY $1 DESC;
+    SQL
+  end
+  
+  def leaderboard_filtered_season_type
+    sql = <<~SQL
+      SELECT matches.player_id, players.username AS user,
+      SUM(place_points + elim_points) AS points,
+      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND season_id = $2 AND match_type_id = $3 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
+      ROUND(AVG(matches.place)) AS avg_place,
+      SUM(matches.elims) AS elims,
+      ROUND(AVG(matches.elims)) AS avg_elims,
+      COUNT(matches.player_id) AS played
+      FROM players JOIN matches ON players.id = matches.player_id
+      WHERE season_id = $2 AND match_type_id = $3
+      GROUP BY players.username, matches.player_id
+      ORDER BY $1 DESC;
+    SQL
+  end
+end
+
+class DatabasePersistence
+  include Filterable
+  
+  def initialize
+    @db = connect_to_database
+  end
+  
+  def disconnect
+    db.close
+  end
+  
+  def query(statement, *params)
+    db.exec_params(statement, params)
+  end
+  
+  def get_users
+    sql = <<~SQL
+      SELECT username, pass, question FROM players;
+    SQL
+    
+    result = query(sql)
+    
+    result.map do |tuple|
+      { username: tuple['username'], pass: tuple['pass'], question: tuple['question'] }
+    end
+  end
+  
+  def add_new_player(username, password, question)
+    sql = <<~SQL
+      INSERT INTO players (username, pass, question)
+      VALUES ($1, $2, $3);
+    SQL
+    
+    query(sql, username, password, question)
+  end
+  
+  def get_last_ten
+    sql = <<~SQL
+      SELECT players.username, matches.place, matches.elims, match_types.match_type,
+      (matches.elim_points + matches.place_points) AS points
+      FROM players JOIN matches ON players.id = matches.player_id
+      JOIN match_types ON match_types.id = matches.match_type_id
+      ORDER BY matches.date_played DESC
+      LIMIT 10;
+    SQL
+    
+    result = query(sql)
+    
+    result.map do |tuple|
+      last_ten_hash(tuple)
+    end
+  end
+  
+  def update_password(username, password)
+    sql = <<~SQL
+      UPDATE players SET pass = $1
+      WHERE username = $2;
+    SQL
+    
+    query(sql, password, username)
+  end
+  
+  def get_season
+    sql = 'SELECT season FROM seasons WHERE active = true;'
+    
+    result = query(sql)
+    
+    result.map { |tuple| tuple['season'] }.first
+  end
+  
+  def get_seasons
+    sql = 'SELECT season, active FROM seasons ORDER BY season ASC;'
+    
+    result = query(sql)
+    
+    result.map { |tuple| {number: tuple['season'], active: tuple['active']} }
+  end
+  
+  def is_admin?(user)
+    sql = 'SELECT admin FROM players WHERE username = $1;'
+    
+    result = query(sql, user)
+    
+    admin = result.map { |tuple| {admin: tuple['admin']} }
+    admin.first[:admin] == 't'
+  end
+  
+  def get_summary(user, season, type)
+    user_id = get_user_id(user)
+    season_id = get_season_id(season)
+    type_id = get_type_id(type)
+    
+    if season == 'all' && type == 'combined'
+      sql = summary_unfiltered
+      result = query(sql, user_id)
+    elsif season == 'all'
+      sql = summary_filtered_type
+      result = query(sql, user_id, type_id)
+    elsif type == 'combined'
+      sql = summary_filtered_season
+      result = query(sql, user_id, season_id)
+    else
+      sql = summary_filtered_season_type
+      result = query(sql, user_id, season_id, type_id)
+    end  
+        
+    result.map { |tuple| summary_hash(tuple) }
+  end
+
+  def get_match(user, season, type, offset)
+    user_id = get_user_id(user)
+    season_id = get_season_id(season)
+    type_id = get_type_id(type)
+    
+    if season == 'all' && type == 'combined'
+      sql = match_unfiltered
+      result = query(sql, user_id, offset)
+    elsif season == 'all'
+      sql = match_filtered_type
+      result = query(sql, user_id, type_id, offset)
+    elsif type == 'combined'
+      sql = match_filtered_season
+      result = query(sql, user_id, season_id, offset)
+    else
+      sql = match_filtered_season_type
+      result = query(sql, user_id, season_id, type_id, offset)
+    end    
+
+    result.map { |tuple| match_hash(tuple) }
+  end
+  
+  def get_elim_points
+    sql = 'SELECT point_value FROM elim_points;'
+    
+    result = query(sql)
+    
+    result.map { |tuple| tuple['point_value'] }.first.to_i
+  end
+  
+  def get_place_points(place)
+    sql = 'SELECT point_value FROM place_points WHERE ($1)::integer <@ place;'
+    
+    result = query(sql, place.to_i)
+    
+    result.map { |tuple| tuple['point_value'] }.first.to_i
+  end
+  
+  def add_stats(user, type, season, place_points, elim_points, place, elims)
+    user_id = get_user_id(user)
+    type_id = get_type_id(type)
+    season_id = get_season_id(season)
+    
+    sql = <<~SQL
+      INSERT INTO matches (player_id, match_type_id, season_id, place_points,
+      elim_points, place, elims) VALUES ($1, $2, $3, $4, $5, $6, $7);
+    SQL
+    
+    result = query(sql, user_id, type_id, season_id, place_points, elim_points, place, elims)
+  end
+  
+  def update_active_season(season)
+    deactivate_sql = 'UPDATE seasons SET active = false;'
+    activate_sql = 'UPDATE seasons SET active = true WHERE season = $1;'
+    
+    query(deactivate_sql)
+    query(activate_sql, season)
+  end
+  
+  def add_new_season(season)
+    sql = 'INSERT INTO seasons (season) VALUES ($1);'
+    
+    query(sql, season)
+  end
+  
+  def get_all_players
+    sql = 'SELECT username FROM players;'
+    
+    result = query(sql)
+    
+    result.map { |tuple| {name: tuple['username']} }
+  end
+  
+  def get_leaderboard_stats(type, season, sort)
+    season_id = get_season_id(season)
+    type_id = get_type_id(type)
+    
+    if season == 'all' && type == 'combined'
+      sql = leaderboard_unfiltered
+      result = query(sql, sort)
+    elsif season == 'all'
+      sql = leaderboard_filtered_type
+      result = query(sql, sort, type_id)
+    elsif type == 'combined'
+      sql = leaderboard_filtered_season
+      result = query(sql, sort, season_id)
+    else
+      sql = leaderboard_filtered_season_type
+      result = query(sql, sort, season_id, type_id)
+    end
+    
+    result.map do |tuple|
+      leaderboard_hash(tuple)
+    end
+  end
+  
+  private #-----------------------------------------------------------------------------------------
+  
+  attr_reader :db
+  
+  def connect_to_database
+    if Sinatra::Base.production?
+      PG.connect(ENV['DATABASE_URL'])
+    else
+      PG.connect(dbname: "fort_test")
+    end
+  end
+  
+  def last_ten_hash(tuple)
+    { username: tuple['username'],
+      place: tuple['place'].to_i,
+      elims: tuple['elims'].to_i,
+      match_type: tuple['match_type'].capitalize,
+      points: tuple['points'].to_i }
+  end
+  
+  def summary_hash(tuple)
+    { wins: tuple['wins'],
+      avg_place: tuple['avg_place'],
+      elims: tuple['elims'],
+      avg_elims: tuple['avg_elims'],
+      points: tuple['points'] }
+  end
+
+  def match_hash(tuple)
+    { date: tuple['date'],
+      place: tuple['place'],
+      elims: tuple['elims'],
+      type: tuple['type'],
+      points: tuple['points'],
+      entries: tuple['entries'].to_i }
+  end
+  
+  def leaderboard_hash(tuple)
+    { user: tuple['user'],
+      points: tuple['points'].to_i,
+      wins: tuple['wins'].to_i,
+      avg_place: tuple['avg_place'].to_i,
+      elims: tuple['elims'].to_i,
+      avg_elims: tuple['avg_elims'].to_i,
+      played: tuple['played'].to_i }
+  end
+  
+  def get_user_id(user)
+    sql = 'SELECT id FROM players WHERE username = $1;'
+    result = query(sql, user)
+    result.map { |tuple| {id: tuple['id']} }.first[:id]
+  end
+  
+  def get_season_id(season)
+    return 0 if season == 'all'
+    sql = 'SELECT id FROM seasons WHERE season = $1;'
+    result = query(sql, season)
+    result.map { |tuple| {id: tuple['id']} }.first[:id]
+  end
+  
+  def get_type_id(type)
+    return 0 if type == 'combined'
+    sql = 'SELECT id FROM match_types WHERE match_type = $1;'
+    result = query(sql, type)
+    result.map { |tuple| {id: tuple['id']} }.first[:id]
   end
 end

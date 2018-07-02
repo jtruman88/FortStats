@@ -1,14 +1,9 @@
 <% if session[:logged_in] %>
   <% season = (@season == 'all' ? "#{@season.capitalize} Seasons" : "Season #{@season}") %>
-  <h2>Viewing <%= @type.capitalize %> Stats for <%= season %></h2>
+  <h2>"<%= @user %>" <%= @type.capitalize %> Stats for <%= season %></h2>
   <section class="filters">
-    <section class="header-logout">
-      <h3>Filters:</h3>
-      <form action="/players/logout" method="post">
-        <input type="submit" value="Logout">
-      </form>
-    </section>
-    <form action="/player/stats/filter/page-1" method="get">
+    <h3>Filters:</h3>
+    <form action="/players/<%= @user %>/stats/filter/page-1" method="get">
       <fieldset>
         <label for="type">Type:</label>
         <select name="type">
@@ -34,14 +29,7 @@
     </form>
   </section>
   <section class="summary">
-    <% if admin?(session[:current_user]) %>
-      <section class="header-link">
-        <h3>Summary</h3>
-        <a href="/seasons/edit">Edit Seasons</a>
-      </section>
-    <% else %>
-      <h3>Summary</h3>
-    <% end %>
+    <h3>Summary</h3>
     <table>
       <thead>
         <tr>
@@ -68,7 +56,6 @@
   <section class="match">
     <section class="header-link">
       <h3>Match Stats</h3>
-      <a href="/player/stats/add">Add Stats</a>
     </section>
     <table>
       <thead>
@@ -122,7 +109,7 @@
     <% end %>
   </footer>
 <% else %>
-  <h2>Login to view your stats</h2>
+  <h2>Login to view other player's stats</h2>
   <p>
     <a href="/players/login">Login</a> Or <a href="/players/new">Sign Up</a> to start tracking your stats!
   </p>

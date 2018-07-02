@@ -1,0 +1,24 @@
+<section class="seasons">
+  <h2>Season Info</h2>
+  <form action="/seasons/set-active" method="post">
+    <fieldset>
+      <label for="active">Active Season</label>
+      <select name="active">
+        <% @seasons.each do |season| %>
+          <option value="<%= season[:number] %>" <%= ('selected' if season[:active] == 't') %>>
+            <%= season[:number] %>
+          </option>
+        <% end %>
+      </select>
+    </fieldset>
+    <input type="submit" value="Update">
+  </form>
+
+  <form action="/seasons/add" method="post">
+    <fieldset>
+      <lebel for="new">Add new Season</lebel>
+      <input type="text" name="new" id="new" autocomplete="off">
+    </fieldset>
+    <input type="submit" value="Add">
+  </form>
+</section>
