@@ -1,116 +1,123 @@
-<% if session[:logged_in] %>
-  <% season = (@season == 'all' ? "#{@season.capitalize} Seasons" : "Season #{@season}") %>
-  <h2>"<%= @user %>" <%= @type.capitalize %> Stats for <%= season %></h2>
-  <section class="filters">
-    <h3>Filters:</h3>
-    <form action="/players/<%= @user %>/stats/filter/page-1" method="get">
-      <fieldset>
-        <label for="type">Type:</label>
-        <select name="type">
-          <option value="combined" <%= ('selected' if @type == 'combined') %>>Combined</option>
-          <option value="solo" <%= ('selected' if @type == 'solo') %>>Solo</option>
-          <option value="duo" <%= ('selected' if @type == 'duo') %>>Duo</option>
-          <option value="squad" <%= ('selected' if @type == 'squad') %>>Squad</option>
-        </select>
-      </fieldset>
-      <fieldset>
-        <label for="season">Season:</label>
-        <select name="season">
-          <option value="all" <%= ('selected' if @season == 'all') %>>All</option>
-          <% @seasons.each do |season| %>
-            <% number = season[:number] %>
-            <option value="<%= number %>" <%= ('selected' if @season == number) %>>
-              <%= number %>
-            </option>
-          <% end %>
-        </select>
-      </fieldset>
-      <input type="submit" value="Apply Filters">
-    </form>
-  </section>
-  <section class="summary">
-    <h3>Summary</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Wins</th>
-          <th>Avg Place</th>
-          <th>Elims</th>
-          <th>Avg Elims</th>
-          <th>Points</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <% @summary_stats.each do |stat| %>
-            <td><%= stat[:wins] %></td>
-            <td><%= stat[:avg_place] %></td>
-            <td><%= stat[:elims] %></td>
-            <td><%= stat[:avg_elims] %></td>
-            <td><%= stat[:points] %></td>
-          <% end %>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-  <section class="match">
-    <section class="header-link">
-      <h3>Match Stats</h3>
+<section class="stats-page player-stats">
+  <% if session[:logged_in] %>
+    <% season = (@season == 'all' ? "#{@season.capitalize} Seasons" : "Season #{@season}") %>
+    <h2>"<%= @user %>" <%= @type.capitalize %> Stats for <%= season %></h2>
+    <section class="filters">
+      <h3>Filters:</h3>
+      <form action="/players/<%= @user %>/stats/filter/page-1" method="get">
+        <fieldset>
+          <label for="type">Type:</label>
+          <select name="type">
+            <option value="combined" <%= ('selected' if @type == 'combined') %>>Combined</option>
+            <option value="solo" <%= ('selected' if @type == 'solo') %>>Solo</option>
+            <option value="duo" <%= ('selected' if @type == 'duo') %>>Duo</option>
+            <option value="squad" <%= ('selected' if @type == 'squad') %>>Squad</option>
+          </select>
+        </fieldset>
+        <fieldset>
+          <label for="season">Season:</label>
+          <select name="season">
+            <option value="all" <%= ('selected' if @season == 'all') %>>All</option>
+            <% @seasons.each do |season| %>
+              <% number = season[:number] %>
+              <option value="<%= number %>" <%= ('selected' if @season == number) %>>
+                <%= number %>
+              </option>
+            <% end %>
+          </select>
+          <input type="submit" value="Apply Filters">
+        </fieldset>
+      </form>
     </section>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Place</th>
-          <th>Elims</th>
-          <th>Type</th>
-          <th>Points</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @match_stats.each do |stat| %>
+    <section class="summary">
+      <h3>Summary</h3>
+      <table>
+        <thead>
           <tr>
-            <td><%= stat[:date] %></td>
-            <td><%= stat[:place] %></td>
-            <td><%= stat[:elims] %></td>
-            <td><%= stat[:type].capitalize %></td>
-            <td><%= stat[:points] %></td>
+            <th>Wins</th>
+            <th>Avg Place</th>
+            <th>Elims</th>
+            <th>Avg Elims</th>
+            <th>Points</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </section>
-  <footer>
-    <p>Page</p>
-    <% if @page > 1 %>
-      <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= @page - 1 %>">
-        <img class="linked" src="/images/arrow-left.png">
-      </a>
-    <% end %>
-    
-    <ul class="pages">
-      <% 1.upto(@page_limit) do |current_page| %>
-        <% if current_page == @page %>
-          <li><%= current_page %></li>
-        <% else %>
-          <li>
-            <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= current_page %>">
-              <%= current_page %>
+        </thead>
+        <tbody>
+          <tr>
+            <% @summary_stats.each do |stat| %>
+              <td><%= stat[:wins] %></td>
+              <td><%= stat[:avg_place] %></td>
+              <td><%= stat[:elims] %></td>
+              <td><%= stat[:avg_elims] %></td>
+              <td><%= stat[:points] %></td>
+            <% end %>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="match">
+      <section class="header-link">
+        <h3>Match Stats</h3>
+      </section>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Place</th>
+            <th>Elims</th>
+            <th>Type</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @match_stats.each_with_index do |stat, ind| %>
+            <tr class="<%= ('off-color' if ind % 2 == 0) %>">
+              <td><%= stat[:date] %></td>
+              <td><%= stat[:place] %></td>
+              <td><%= stat[:elims] %></td>
+              <td><%= stat[:type].capitalize %></td>
+              <td><%= stat[:points] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </section>
+    <footer>
+      <p>Page</p>
+
+      <ul class="pages">
+        <li>
+          <% if @page > 1 %>
+            <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= @page - 1 %>">
+              <img class="linked" src="/images/arrow-left.png">
             </a>
-          </li>
+          <% end %>
+        </li>
+        <% 1.upto(@page_limit) do |current_page| %>
+          <% if current_page == @page %>
+            <li><%= current_page %></li>
+          <% else %>
+            <li>
+              <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= current_page %>">
+                <%= current_page %>
+              </a>
+            </li>
+          <% end %>
         <% end %>
-      <% end %>
-    </ul>
-    
-    <% if @page < @page_limit %>
-      <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= @page + 1 %>">
-        <img class="linked" src="/images/arrow-right.png">
-      </a>
-    <% end %>
-  </footer>
-<% else %>
-  <h2>Login to view other player's stats</h2>
-  <p>
-    <a href="/players/login">Login</a> Or <a href="/players/new">Sign Up</a> to start tracking your stats!
-  </p>
-<% end %>
+        <li>
+          <% if @page < @page_limit %>
+            <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= @page + 1 %>">
+              <img class="linked" src="/images/arrow-right.png">
+            </a>
+          <% end %>
+        </li>
+      </ul>
+    </footer>
+  <% else %>
+    <section class="login-msg">
+      <h2>Login to view other player's stats</h2>
+      <p>
+        <a href="/players/login">Login</a> to start tracking your stats! Or <a href="/players/new">Sign Up</a>
+      </p>
+    </section>
+  <% end %>
+</section>

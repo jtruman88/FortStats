@@ -1,7 +1,7 @@
 <section class="players">
   <% if session[:logged_in] %>
     <h2>All Players</h2>
-    <p>Check out other player's stats!</p>
+    <p>Check out other players' stats!</p>
     <ul>
       <% @players.each do |player| %>
       <% current_player = player[:name] %>
@@ -14,9 +14,11 @@
       <% end %>
     </ul>
   <% else %>
-  <h2>Login to view other player's stats</h2>
-  <p>
-    <a href="/players/login">Login</a> Or <a href="/players/new">Sign Up</a> to start tracking your stats!
-  </p>
+  <section class="login-msg">
+    <h2>Login to view other players' stats</h2>
+    <p>
+      <a href="/players/login">Login</a> to start tracking your stats! Or <a href="/players/new">Sign Up</a>
+    </p>
+  </section>
   <% end %>
 </section>

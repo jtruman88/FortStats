@@ -1,101 +1,105 @@
-<% if session[:logged_in] %>
-  <% season = (@season == 'all' ? "#{@season.capitalize} Seasons" : "Season #{@season}") %>
-  <section calss="leaderboard">
-    <section class="filters">
-      <h2>Leaderboard</h2>
-      <h3>Filters:</h3>
-        <form action="/leaderboard/filter" method="get">
-          <fieldset>
-            <label for="type">Type:</label>
-            <select name="type">
-              <option value="combined" <%= ('selected' if @type == 'combined') %>>
-                Combined
-              </option>
-              <option value="solo" <%= ('selected' if @type == 'solo') %>>
-                Solo
-              </option>
-              <option value="duo" <%= ('selected' if @type == 'duo') %>>
-                Duo
-              </option>
-              <option value="squad" <%= ('selected' if @type == 'squad') %>>
-                Squad
-              </option>
-            </select>
-          </fieldset>
-          <fieldset>
-            <label for="season">Season:</label>
-            <select name="season">
-              <option value="all" <%= ('selected' if @season == 'all') %>>All</option>
-              <% @seasons.each do |season| %>
-                <% number = season[:number] %>
-                <option value="<%= number %>" <%= ('selected' if @season == number) %>>
-                  <%= number %>
+<section class="leaderboard">
+  <% if session[:logged_in] %>
+    <% season = (@season == 'all' ? "#{@season.capitalize} Seasons" : "Season #{@season}") %>
+    <section calss="leaderboard">
+      <section class="filters">
+        <h2>Leaderboard</h2>
+        <h3>Filters:</h3>
+          <form action="/leaderboard/filter" method="get">
+            <fieldset>
+              <label for="type">Type:</label>
+              <select name="type">
+                <option value="combined" <%= ('selected' if @type == 'combined') %>>
+                  Combined
                 </option>
-              <% end %>
-            </select>
-          </fieldset>
-          <fieldset>
-            <label for="sort">Sort By:</label>
-            <select name="sort">
-              <option value="user" <%= ('selected' if @sort == 'user') %>>
-                User
-              </option>
-              <option value="points" <%= ('selected' if @sort == 'points') %>>
-                Points
-              </option>
-              <option value="wins" <%= ('selected' if @sort == 'wins') %>>
-                Wins
-              </option>
-              <option value="avg_place" <%= ('selected' if @sort == 'avg_place') %>>
-                Avg Place
-              </option>
-              <option value="elims" <%= ('selected' if @sort == 'elims') %>>
-                Elims
-              </option>
-              <option value="avg_elims" <%= ('selected' if @sort == 'avg_elims') %>>
-                Avg Elims
-              </option>
-              <option value="played" <%= ('selected' if @sort == 'played') %>>
-                Played
-              </option>
-            </select>
-          </fieldset>
-          <input type="submit" value="Apply Filters">
-        </form>
+                <option value="solo" <%= ('selected' if @type == 'solo') %>>
+                  Solo
+                </option>
+                <option value="duo" <%= ('selected' if @type == 'duo') %>>
+                  Duo
+                </option>
+                <option value="squad" <%= ('selected' if @type == 'squad') %>>
+                  Squad
+                </option>
+              </select>
+            </fieldset>
+            <fieldset>
+              <label for="season">Season:</label>
+              <select name="season">
+                <option value="all" <%= ('selected' if @season == 'all') %>>All</option>
+                <% @seasons.each do |season| %>
+                  <% number = season[:number] %>
+                  <option value="<%= number %>" <%= ('selected' if @season == number) %>>
+                    <%= number %>
+                  </option>
+                <% end %>
+              </select>
+            </fieldset>
+            <fieldset>
+              <label for="sort">Sort By:</label>
+              <select name="sort">
+                <option value="user" <%= ('selected' if @sort == 'user') %>>
+                  User
+                </option>
+                <option value="points" <%= ('selected' if @sort == 'points') %>>
+                  Points
+                </option>
+                <option value="wins" <%= ('selected' if @sort == 'wins') %>>
+                  Wins
+                </option>
+                <option value="avg_place" <%= ('selected' if @sort == 'avg_place') %>>
+                  Avg Place
+                </option>
+                <option value="elims" <%= ('selected' if @sort == 'elims') %>>
+                  Elims
+                </option>
+                <option value="avg_elims" <%= ('selected' if @sort == 'avg_elims') %>>
+                  Avg Elims
+                </option>
+                <option value="played" <%= ('selected' if @sort == 'played') %>>
+                  Played
+                </option>
+              </select>
+              <input type="submit" value="Apply Filters">
+            </fieldset>
+          </form>
+      </section>
+      <section class="leader-stats">
+        <h3><%= season %> <%= @type.capitalize %></h3>
+        <table class="leader-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Points</th>
+              <th>Wins</th>
+              <th>Avg Place</th>
+              <th>Elims</th>
+              <th>Avg Elims</th>
+              <th>Played</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @leader_stats.each_with_index do |player, ind| %>
+            <tr class="<%= ('off-color' if ind % 2 == 0) %>">
+              <td><%= player[:user] %></td>
+              <td><%= player[:points] %></td>
+              <td><%= player[:wins] %></td>
+              <td><%= player[:avg_place] %></td>
+              <td><%= player[:elims] %></td>
+              <td><%= player[:avg_elims] %></td>
+              <td><%= player[:played] %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </section>
     </section>
-    <section class="leader-stats">
-      <h3><%= season %> <%= @type %></h3>
-      <table class="leader-table">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Points</th>
-            <th>Wins</th>
-            <th>Avg Place</th>
-            <th>Elims</th>
-            <th>Avg Elims</th>
-            <th>Played</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @leader_stats.each do |player| %>
-          <tr>
-            <td><%= player[:user] %></td>
-            <td><%= player[:points] %></td>
-            <td><%= player[:wins] %></td>
-            <td><%= player[:avg_place] %></td>
-            <td><%= player[:elims] %></td>
-            <td><%= player[:avg_elims] %></td>
-            <td><%= player[:played] %></td>
-          </tr>
-          <% end %>
-        </tbody>
-      </table>
+  <% else %>
+    <section class="login-msg">
+      <h2>Login to view the leaderboard</h2>
+      <p>
+        <a href="/players/login">Login</a> to start tracking your stats! Or <a href="/players/new">Sign Up</a>
+      </p>
     </section>
-  </section>
-<% else %>
-  <h2>Login to view the Leaderboard</h2>
-  <p>
-    <a href="/players/login">Login</a> Or <a href="/players/new">Sign Up</a> to start tracking your stats!
-  </p>
-<% end %>
+  <% end %>
+</section>

@@ -129,8 +129,7 @@ module Filterable
       ROUND(AVG(matches.elims)) AS avg_elims,
       COUNT(matches.player_id) AS played
       FROM players JOIN matches ON players.id = matches.player_id
-      GROUP BY players.username, matches.player_id
-      ORDER BY $1 DESC;
+      GROUP BY players.username, matches.player_id;
     SQL
   end
   
@@ -138,15 +137,14 @@ module Filterable
     sql = <<~SQL
       SELECT matches.player_id, players.username AS user,
       SUM(place_points + elim_points) AS points,
-      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND match_type_id = $2 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
+      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND match_type_id = $1 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
       ROUND(AVG(matches.place)) AS avg_place,
       SUM(matches.elims) AS elims,
       ROUND(AVG(matches.elims)) AS avg_elims,
       COUNT(matches.player_id) AS played
       FROM players JOIN matches ON players.id = matches.player_id
-      WHERE match_type_id = $2
-      GROUP BY players.username, matches.player_id
-      ORDER BY $1 DESC;
+      WHERE match_type_id = $1
+      GROUP BY players.username, matches.player_id;
     SQL
   end
   
@@ -154,15 +152,14 @@ module Filterable
     sql = <<~SQL
       SELECT matches.player_id, players.username AS user,
       SUM(place_points + elim_points) AS points,
-      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND season_id = $2 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
+      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND season_id = $1 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
       ROUND(AVG(matches.place)) AS avg_place,
       SUM(matches.elims) AS elims,
       ROUND(AVG(matches.elims)) AS avg_elims,
       COUNT(matches.player_id) AS played
       FROM players JOIN matches ON players.id = matches.player_id
-      WHERE season_id = $2
-      GROUP BY players.username, matches.player_id
-      ORDER BY $1 DESC;
+      WHERE season_id = $1
+      GROUP BY players.username, matches.player_id;
     SQL
   end
   
@@ -170,15 +167,14 @@ module Filterable
     sql = <<~SQL
       SELECT matches.player_id, players.username AS user,
       SUM(place_points + elim_points) AS points,
-      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND season_id = $2 AND match_type_id = $3 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
+      (SELECT winners FROM (SELECT player_id, COUNT(place) AS winners FROM matches WHERE place = 1 AND season_id = $1 AND match_type_id = $2 GROUP BY player_id) AS win_count WHERE win_count.player_id = matches.player_id) AS wins,
       ROUND(AVG(matches.place)) AS avg_place,
       SUM(matches.elims) AS elims,
       ROUND(AVG(matches.elims)) AS avg_elims,
       COUNT(matches.player_id) AS played
       FROM players JOIN matches ON players.id = matches.player_id
-      WHERE season_id = $2 AND match_type_id = $3
-      GROUP BY players.username, matches.player_id
-      ORDER BY $1 DESC;
+      WHERE season_id = $1 AND match_type_id = $2
+      GROUP BY players.username, matches.player_id;
     SQL
   end
 end
@@ -405,22 +401,22 @@ class DatabasePersistence
     result.map { |tuple| {name: tuple['username']} }
   end
   
-  def get_leaderboard_stats(type, season, sort)
+  def get_leaderboard_stats(type, season)
     season_id = get_season_id(season)
     type_id = get_type_id(type)
     
     if season == 'all' && type == 'combined'
       sql = leaderboard_unfiltered
-      result = query(sql, sort)
+      result = query(sql)
     elsif season == 'all'
       sql = leaderboard_filtered_type
-      result = query(sql, sort, type_id)
+      result = query(sql, type_id)
     elsif type == 'combined'
       sql = leaderboard_filtered_season
-      result = query(sql, sort, season_id)
+      result = query(sql, season_id)
     else
       sql = leaderboard_filtered_season_type
-      result = query(sql, sort, season_id, type_id)
+      result = query(sql, season_id, type_id)
     end
     
     result.map do |tuple|

@@ -129,6 +129,14 @@ def calc_place_points(type, place, players)
   (points + handicap).round
 end
 
+def sort_stats(stats, sort)
+  if sort == 'user' || sort == 'avg_place'
+    stats.sort_by { |player| player[@sort.to_sym] }
+  else
+    stats.sort_by { |player| player[@sort.to_sym] }.reverse
+  end
+end
+
 get '/' do
   if session[:logged_in]
     @last_ten = @data.get_last_ten
@@ -354,7 +362,8 @@ get '/leaderboard/:type/:season/sort-by-:sort' do
   @season = params[:season]
   @sort = params[:sort]
   @seasons = @data.get_seasons
-  @leader_stats = @data.get_leaderboard_stats(@type, @season, @sort)
+  stats = @data.get_leaderboard_stats(@type, @season)
+  @leader_stats = sort_stats(stats, @sort)
 
   erb :leaderboard
 end
@@ -364,13 +373,17 @@ get '/leaderboard/filter' do
   @season = params[:season]
   @sort = params[:sort]
   @seasons = @data.get_seasons
-  @leader_stats = @data.get_leaderboard_stats(@type, @season, @sort)
+  stats = @data.get_leaderboard_stats(@type, @season)
+  @leader_stats = sort_stats(stats, @sort)
   
   erb :leaderboard
+end
+
+get '/faq' do
+  
+  erb :faq
 end
 
 # ADD PLAYED TO MY STATS AND PLAYER STATS. WILL EQUAL NUMBER OF MATCHES PLAYED
 # ADD IF LOGGED_IN / ADMIN PROTECTION TO LOGIN / ADMIN ONLY PAGES
 # ALSO ADD INVALID PAGE CATCH
-# REMOVE ARROW FROM NEXT OR BACK IF NOT CLICKABLE
-# MOVE FILTER METHODS TO  FILTERABLE MODULE

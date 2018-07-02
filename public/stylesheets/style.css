@@ -6,6 +6,10 @@ html {
   text-align: center;
 }
 
+input[type="text"] {
+  font-family: 'Acme', cursive, sans-serif;
+}
+
 section {
   margin: 50px auto 0 auto;
   width: 95%;
@@ -70,6 +74,49 @@ tr.off-color {
   background: rgb(180,215,255);
 }
 
+.success {
+  background: rgb(2,147,19);
+  padding: 10px;
+}
+
+.error {
+  background: rgb(201,37,36);
+  padding: 10px;
+}
+
+.header-link {
+  align-content: space-between;
+  display: flex;
+  width: 100%;
+}
+
+.header-link h3,
+.header-link a {
+  flex: 1;
+}
+
+.header-link h3 {
+  font-size: 50px;
+  margin-top: 15px;
+  margin-top: 15px;
+  text-align: left;
+  text-decoration: underline;
+}
+
+.header-link a {
+  background: rgb(180,215,255);
+  border: 2px solid rgb(52,84,116);
+  color: black;
+  font-size: 40px;
+  font-weight: bold;
+  padding: 10px 20px;
+  text-decoration: none;
+}
+
+.header-link a:visited {
+  color: black;
+}
+
 /* --------------------------------------- HEADER --------------------------------------------- */
 
 header {
@@ -111,10 +158,14 @@ header li a:visited {
   font-size: 20px;
 }
 
+.home table + p {
+  margin-top: 40px;
+}
+
 .home .big-button,
 .home h3,
 .home table {
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 .home h3 {
@@ -180,9 +231,271 @@ header li a:visited {
   text-align: left;
 }
 
+/* --------------------------------------- MY STATS --------------------------------------------- */
+
+.stats-page h2 {
+  font-size: 55px;
+}
+
+.summary h3 {
+  font-size: 50px;
+  text-align: left;
+  text-decoration: underline;
+}
+
+.header-logout {
+  align-content: space-between;
+  display: flex;
+  width: 100%;
+}
+
+.header-logout h3 {
+  font-size: 50px;
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: underline;
+  vertical-align: middle;
+}
+
+.header-logout form {
+  text-align: right;
+}
+
+.header-logout input,
+.filters > form input {
+  background: rgb(180,215,255);
+  border: 2px solid rgb(52,84,116);
+  font-size: 35px;
+  font-weight: bold;
+  padding: 10px 60px;
+}
+
+.header-logout h3,
+.header-logout form {
+  flex: 1;
+}
+
+.stats-page,
+.filters,
+.header-logout {
+  margin-top: 20px;
+}
+
+.filters > form  {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.filters > form label {
+  display: inline-block;
+  font-size: 45px;
+  width: 160px;
+}
+
+.filters > form fieldset {
+  margin: 10px 0;
+}
+
+.filters > form select {
+  background: white;
+  border: 1px solid black;
+  font-size: 35px;
+  padding: 10px 20px;
+  width: 220px;
+}
+
+.filters > form input {
+  margin-left: 50px;
+  padding: 10px 40px;
+}
+
+.summary table,
+.match table {
+  margin-top: 15px;
+}
+
+.login-msg h2 {
+  font-size: 70px;
+}
+
+.login-msg p {
+  margin-top: 30px;
+}
+
+/* --------------------------------------- ADD STATS / SEASONS ----------------------------------- */
+
+.add-stats h2,
+.seasons h2 {
+  text-decoration: underline;
+}
+
+.add-stats form,
+.seasons form {
+  text-align: left;
+}
+
+.add-stats fieldset,
+.seasons fieldset {
+  margin: 40px 0;
+}
+
+.add-stats label,
+.seasons label {
+  display: block;
+  font-size: 45px;
+}
+
+.add-stats select,
+.seasons select {
+  border: 1px solid black;
+  font-size: 40px;
+  margin-top: 10px;
+  padding: 10px 20px;
+  width: 180px;
+}
+
+.add-stats input[type="submit"],
+.seasons input[type="submit"] {
+  background: rgb(180,215,255);
+  border: 2px solid rgb(52,84,116);
+  font-size: 40px;
+  font-weight: bold;
+  margin-left: 20px;
+  padding: 10px 40px;
+}
+
+.add-stats fieldset + input[type="submit"],
+.seasons input[type="submit"] {
+  margin: 10px 0 0 0;
+}
+
+.add-stats input[type="text"],
+.seasons input[type="text"] {
+  background: white;
+  border: 2px solid rgb(52,84,116);
+  font-size: 40px;
+  margin-top: 10px;
+  padding: 10px 20px;
+  width: 180px;
+}
+
+.add-stats .big-button {
+  margin-top: 60px;
+}
+
+.seasons form {
+  margin-top: 50px;
+}
+
+/* --------------------------------------- PLAYERS --------------------------------------------- */
+
+.players {
+  text-align: left;
+}
+
+.players h2 {
+  font-size: 60px;
+  text-decoration: underline;
+}
+
+.players p {
+  font-size: 40px;
+  margin-top: 30px;
+}
+
+.players ul {
+  margin-top: 50px;
+}
+
+.players li {
+  margin-top: 30px;
+  width: 50%;
+}
+
+.players li a {
+  background: rgb(180,215,255);
+  border: 2px solid rgb(52,84,116);
+  box-sizing: border-box;
+  color: black;
+  display: block;
+  font-size: 40px;
+  font-weight: bold;
+  padding: 30px 0;
+  text-align: center;
+  text-decoration: none;
+}
+
+.players li a:visited {
+  color: black;
+}
+
+.players .login-msg {
+  text-align: center;
+}
+
+.players .login-msg h2 {
+  font-size: 60px;
+  text-decoration: none;
+}
+
+.players .login-msg p {
+  font-size: 30px;
+  margin-top: 30px;
+}
+
+.player-stats h2 {
+  font-size: 45px;
+}
+
+.player-stats .summary h3,
+.player-stats .filters h3,
+.player-stats .match h3 {
+  font-size: 50px;
+  text-align: left;
+  text-decoration: underline;
+}
+
+/* --------------------------------------- LEADERBOARD ------------------------------------------ */
+
+.leaderboard h2 {
+  font-size: 80px;
+}
+
+.leaderboard h3 {
+  font-size: 50px;
+  text-align: left;
+  text-decoration: underline;
+}
+
+.leaderboard table {
+  margin-top: 30px;
+}
+
 /* --------------------------------------- FOOTER --------------------------------------------- */
+
+footer {
+  width: 100%;
+}
+
+footer p {
+  font-size: 35px;
+  margin-top: 20px;
+}
+
+.pages {
+  align-items: center;
+  display: flex;
+  font-size: 40px;
+  justify-content: center;
+  margin-top: 20px;
+  width: 100%;
+}
+
+footer ul li {
+  flex: 1;
+}
 
 footer img {
   display: inline-block;
-  width: 40px;
+  width: 60px;
 }
