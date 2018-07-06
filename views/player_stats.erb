@@ -87,7 +87,7 @@
       <ul class="pages">
         <li>
           <% if @page > 1 %>
-            <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= @page - 1 %>">
+            <a href="/players/<%= @user %>/stats/<%= @type %>/<%= @season %>/page-<%= @page - 1 %>">
               <img class="linked" src="/images/arrow-left.png">
             </a>
           <% end %>
@@ -97,7 +97,7 @@
             <li><%= current_page %></li>
           <% else %>
             <li>
-              <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= current_page %>">
+              <a href="/players/<%= @user %>/stats/<%= @type %>/<%= @season %>/page-<%= current_page %>">
                 <%= current_page %>
               </a>
             </li>
@@ -105,7 +105,7 @@
         <% end %>
         <li>
           <% if @page < @page_limit %>
-            <a href="/player/stats/<%= @type %>/<%= @season %>/page-<%= @page + 1 %>">
+            <a href="/players/<%= @user %>/stats/<%= @type %>/<%= @season %>/page-<%= @page + 1 %>">
               <img class="linked" src="/images/arrow-right.png">
             </a>
           <% end %>

@@ -76,11 +76,13 @@ tr.off-color {
 
 .success {
   background: rgb(2,147,19);
+  color: white;
   padding: 10px;
 }
 
 .error {
   background: rgb(201,37,36);
+  color: white;
   padding: 10px;
 }
 
@@ -498,4 +500,39 @@ footer ul li {
 footer img {
   display: inline-block;
   width: 60px;
+}
+
+/* --------------------------------------- FAQ --------------------------------------------- */
+
+.faq {
+  text-align: left;
+}
+
+.faq h3,
+.faq h4,
+.faq h5 {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.faq h3,
+.faq h4,
+.faq h5,
+.faq p,
+.faq ul,
+.faq table {
+  margin-top: 30px;
+}
+
+.faq ul {
+  list-style: circle;
+  margin-left: 40px;
+}
+
+.faq h3 {
+  font-size: 40px;
+}
+
+.faq table {
+  text-align: center;
 }

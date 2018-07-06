@@ -53,16 +53,8 @@ INSERT INTO elim_points (point_value) VALUES (10);
 INSERT INTO match_types (match_type) VALUES
 ('solo'), ('duo'), ('squad');
 
-INSERT INTO seasons (season) VALUES (6);
+INSERT INTO seasons (season, active) VALUES (4, true);
 
 INSERT INTO players (username, pass, question, admin) VALUES
 ('JoLTsolo', '$2a$10$0y2uSTy2K/cquz5v2s.OxeRMJKljiNSmKaJS0oRY6adFYeupwJuo2',
-       '$2a$10$QkF3brZa9M3vmSc28RMXJe0Kyof0LoWM9Ldnsg2ng4tgdoccQaJHq', true),
-('Tester', '$2a$10$i1gffSAHEgbvkKB6PKt2FeKv/78aKfEAZl1mb0a2j6JWl6sDVnFi.',
-       '$2a$10$/Be23DHWdQD7UNltncryT.9ZrAthy0bHiWlN4Svc8l3nsBH4LFeay', false);
-       
-INSERT INTO matches (player_id, match_type_id, season_id, place_points, elim_points, place, elims) VALUES
-(1, 1, 1, 94, 20, 2, 2), (2, 1, 1, 94, 20, 2, 2), (1, 3, 1, 25, 60, 1, 3),
-(2, 3, 1, 25, 60, 1, 3), (1, 1, 1, 55, 30, 12, 3), (2, 1, 1, 55, 30, 12, 3),
-(1, 1, 1, 1, 60, 3, 6), (2, 1, 1, 1, 60, 3, 6), (1, 3, 1, 24, 100, 2, 5),
-(2, 3, 1, 24, 100, 2, 5), (1, 3, 1, 22, 100, 4, 5), (2, 3, 1, 22, 100, 4, 5);
+       '$2a$10$QkF3brZa9M3vmSc28RMXJe0Kyof0LoWM9Ldnsg2ng4tgdoccQaJHq', true);
