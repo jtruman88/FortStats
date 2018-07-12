@@ -137,6 +137,16 @@ def sort_stats(stats, sort)
   end
 end
 
+def verify_players(count, type)
+  if type == 'squad' && count == 0
+    return 4
+  elsif type == 'duo' && (count == 0 || count > 2)
+    return 2
+  end
+  
+  count
+end
+
 get '/' do
   if session[:logged_in]
     @last_ten = @data.get_last_ten
@@ -277,7 +287,7 @@ end
 
 post '/player/stats/add' do
   @type = params[:type]
-  @players = params[:players].to_i
+  @players = verify_players(params[:players].to_i, @type) 
   @place = params[:place].to_i
   @elims = params[:elims].to_i
   user = session[:current_user]
@@ -384,7 +394,6 @@ get '/faq' do
   erb :faq
 end
 
-# DO FAQ PAGE
-# ADD PLAYED TO MY STATS AND PLAYER STATS. WILL EQUAL NUMBER OF MATCHES PLAYED
+# FIX ADD STATS PAGE. MAKE ALL FORM HIDDEN UNTIL SELECT IS PRESSED.
 # ADD IF LOGGED_IN / ADMIN PROTECTION TO LOGIN / ADMIN ONLY PAGES
 # ALSO ADD INVALID PAGE CATCH
